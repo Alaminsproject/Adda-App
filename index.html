@@ -3,22 +3,26 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Adda</title>
+<title>Adda Test</title>
 </head>
 <body>
 <h1>Test</h1>
-<div id="out">Loading...</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div id="out">Starting...</div>
 <script>
-const sb = supabase.createClient(
-  'https://qmbhkdbxpcxadatlctew.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtYmhrZGJ4cGN4YWRhdGxjdGV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NTA2NjksImV4cCI6MjA5MzIyNjY2OX0.wKRq1TGAEOzVTm47rzNQ2tQW0Pn7I9QCZUik0D90250'
-);
-
+// CDN ছাড়া direct fetch test
 async function test(){
-  const {data,error} = await sb.from('profiles').select('*').limit(1);
-  if(error) document.getElementById('out').textContent = 'ERROR: ' + error.message;
-  else document.getElementById('out').textContent = 'SUCCESS! Supabase connected!';
+  try{
+    const res = await fetch('https://qmbhkdbxpcxadatlctew.supabase.co/rest/v1/profiles?select=*&limit=1', {
+      headers:{
+        'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtYmhrZGJ4cGN4YWRhdGxjdGV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NTA2NjksImV4cCI6MjA5MzIyNjY2OX0.wKRq1TGAEOzVTm47rzNQ2tQW0Pn7I9QCZUik0D90250',
+        'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtYmhrZGJ4cGN4YWRhdGxjdGV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NTA2NjksImV4cCI6MjA5MzIyNjY2OX0.wKRq1TGAEOzVTm47rzNQ2tQW0Pn7I9QCZUik0D90250'
+      }
+    });
+    const data = await res.json();
+    document.getElementById('out').textContent = 'SUCCESS! ' + JSON.stringify(data);
+  } catch(e){
+    document.getElementById('out').textContent = 'ERROR: ' + e.message;
+  }
 }
 test();
 </script>
