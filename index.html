@@ -1,30 +1,503 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Adda Test</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="theme-color" content="#0a0a0f"/>
+<title>Adda — Chat & Call</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a0f;--s1:#13131a;--s2:#1c1c26;--s3:#242433;
+  --bdr:#2e2e42;--acc:#f97316;--red:#ef4444;--grn:#22c55e;
+  --txt:#f0f0ff;--sub:#9898b8;
+}
+html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:var(--bg);color:var(--txt)}
+button,input{font-family:'Sora',sans-serif}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px}
+
+.page{position:fixed;inset:0;display:none;flex-direction:column}
+.page.show{display:flex}
+
+/* AUTH */
+#p-auth{align-items:center;justify-content:center;background:radial-gradient(ellipse 80% 50% at 50% 0%,#200e00,var(--bg))}
+.abox{width:min(390px,94vw)}
+.logo{width:70px;height:70px;border-radius:20px;background:linear-gradient(135deg,#f97316,#c2410c);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 12px;box-shadow:0 0 40px rgba(249,115,22,.3)}
+.aname{font-size:30px;font-weight:800;text-align:center;letter-spacing:-1px;color:var(--acc)}
+.atag{color:var(--sub);font-size:12px;text-align:center;margin:4px 0 28px;font-size:13px}
+.tabs{display:flex;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:4px;margin-bottom:20px}
+.tab{flex:1;padding:10px;border:none;background:transparent;color:var(--sub);font-weight:600;font-size:14px;border-radius:9px;transition:.2s}
+.tab.on{background:var(--s2);color:var(--txt)}
+.inp{width:100%;padding:13px 15px;background:var(--s1);border:1.5px solid var(--bdr);border-radius:12px;color:var(--txt);font-size:14px;outline:none;transition:.2s;display:block;margin-bottom:12px}
+.inp:focus{border-color:var(--acc)}
+.inp::placeholder{color:var(--sub)}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#f97316,#c2410c);border:none;border-radius:12px;color:#fff;font-weight:700;font-size:15px;transition:.15s}
+.btn:active{opacity:.8}
+.errt{color:var(--red);font-size:12px;text-align:center;min-height:18px;margin-bottom:8px}
+
+/* APP */
+#p-app{flex-direction:row}
+.sb{width:320px;flex-shrink:0;border-right:1px solid var(--bdr);display:flex;flex-direction:column;background:var(--s1)}
+.main{flex:1;display:flex;flex-direction:column;position:relative;overflow:hidden}
+
+/* SIDEBAR */
+.sb-hd{padding:14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px}
+.sb-title{font-weight:800;font-size:17px;color:var(--acc);flex:1}
+.ib{background:none;border:none;color:var(--sub);padding:7px;border-radius:9px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.ib:active{background:var(--s3);color:var(--txt)}
+.sb-srch{padding:8px 12px;border-bottom:1px solid var(--bdr)}
+.srch-inp{width:100%;padding:9px 12px;background:var(--s2);border:1px solid var(--bdr);border-radius:10px;color:var(--txt);font-size:13px;outline:none}
+.srch-inp::placeholder{color:var(--sub)}
+.clist{flex:1;overflow-y:auto}
+.ci{display:flex;align-items:center;gap:11px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:.15s;position:relative}
+.ci:active,.ci.on{background:var(--s2)}
+.av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#f97316,#c2410c);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;position:relative}
+.av-sm{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#f97316,#c2410c);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+.odot{width:10px;height:10px;background:var(--grn);border-radius:50%;border:2px solid var(--s1);position:absolute;bottom:0;right:0}
+.ci-info{flex:1;min-width:0}
+.ci-nm{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-ls{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.ci-tm{font-size:11px;color:var(--sub);flex-shrink:0}
+.nolist{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--sub);padding:40px;text-align:center;gap:8px;font-size:13px}
+.me-b{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--bdr);background:var(--s2)}
+.me-nm{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me-em{font-size:11px;color:var(--sub)}
+
+/* CHAT */
+.mempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--sub);gap:10px}
+.cwin{flex:1;display:none;flex-direction:column;overflow:hidden}
+.cwin.show{display:flex}
+.chd{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--bdr);background:var(--s1);flex-shrink:0}
+.chd-info{flex:1;min-width:0}
+.chd-nm{font-weight:700;font-size:15px}
+.chd-st{font-size:11px;color:var(--grn);margin-top:1px}
+.chd-st.off{color:var(--sub)}
+.msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:5px;background:var(--bg)}
+.mrow{display:flex;align-items:flex-end;gap:6px}
+.mrow.me{flex-direction:row-reverse}
+.bbl{max-width:72%;padding:9px 13px;border-radius:18px;font-size:14px;line-height:1.55;word-break:break-word}
+.bbl.them{background:var(--s2);border:1px solid var(--bdr);border-bottom-left-radius:4px}
+.bbl.me{background:linear-gradient(135deg,#f97316,#c2410c);color:#fff;border-bottom-right-radius:4px}
+.btm{font-size:10px;opacity:.55;display:block;text-align:right;margin-top:3px}
+.ibar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--bdr);background:var(--s1);flex-shrink:0}
+.minp{flex:1;padding:11px 15px;background:var(--s2);border:1.5px solid var(--bdr);border-radius:26px;color:var(--txt);font-size:14px;outline:none;transition:.2s}
+.minp:focus{border-color:var(--acc)}
+.minp::placeholder{color:var(--sub)}
+.sbtn{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#f97316,#c2410c);border:none;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.sbtn:active{transform:scale(.9)}
+.bbtn{display:none}
+
+/* CALL */
+.cov{position:fixed;inset:0;background:#000;z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center}
+.cov.show{display:flex}
+.crv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.clv{position:absolute;bottom:110px;right:14px;width:110px;height:155px;object-fit:cover;border-radius:14px;border:2px solid rgba(255,255,255,.25);display:none}
+.ctop{position:absolute;top:0;left:0;right:0;padding:60px 24px 24px;background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent);display:flex;flex-direction:column;align-items:center}
+.cav{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#f97316,#c2410c);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:700;color:#fff;margin-bottom:12px}
+.cnm{font-size:24px;font-weight:700;color:#fff}
+.cst{color:rgba(255,255,255,.6);font-size:13px;margin-top:4px}
+.cbtns{position:absolute;bottom:40px;display:flex;gap:18px}
+.cb{width:60px;height:60px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;font-size:24px;transition:.15s}
+.cb:active{transform:scale(.88)}
+.cb-m{background:rgba(255,255,255,.2)}
+.cb-e{background:var(--red)}
+.cb-c{background:rgba(255,255,255,.2)}
+
+/* MODAL */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.mbg.show{display:flex}
+.mbox{background:var(--s1);border:1px solid var(--bdr);border-radius:20px;width:min(390px,94vw);padding:20px}
+.mhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mttl{font-weight:700;font-size:16px}
+.urow{display:flex;align-items:center;gap:12px;padding:10px 8px;border-radius:10px;cursor:pointer;transition:.15s}
+.urow:active{background:var(--s2)}
+.un{font-weight:600;font-size:14px}
+.ue{font-size:12px;color:var(--sub)}
+.nores{color:var(--sub);text-align:center;padding:20px;font-size:13px}
+
+@media(max-width:680px){
+  .sb{width:100%}
+  .main{position:fixed;inset:0;background:var(--bg);transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:10}
+  .main.show{transform:none}
+  .bbtn{display:flex!important}
+}
+</style>
 </head>
 <body>
-<h1>Test</h1>
-<div id="out">Starting...</div>
+
+<!-- AUTH -->
+<div id="p-auth" class="page show">
+  <div class="abox">
+    <div class="logo">💬</div>
+    <div class="aname">Adda</div>
+    <div class="atag">বন্ধুদের সাথে আড্ডা দাও — যেকোনো সময়, যেকোনো জায়গায়</div>
+    <div class="tabs">
+      <button class="tab on" onclick="setM('in')">Sign In</button>
+      <button class="tab" onclick="setM('up')">Sign Up</button>
+    </div>
+    <div id="nw" style="display:none"><input id="inm" class="inp" placeholder="তোমার নাম" type="text"/></div>
+    <input id="iem" class="inp" placeholder="Email" type="email"/>
+    <input id="ipw" class="inp" placeholder="Password (কমপক্ষে ৬ অক্ষর)" type="password" onkeydown="if(event.key==='Enter')auth()"/>
+    <div class="errt" id="err"></div>
+    <button class="btn" id="abtn" onclick="auth()">Sign In</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="p-app" class="page">
+  <div class="sb">
+    <div class="sb-hd">
+      <span class="sb-title">💬 Adda</span>
+      <button class="ib" onclick="openM()" title="নতুন চ্যাট">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      </button>
+      <button class="ib" onclick="logout()" title="Sign out">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+      </button>
+    </div>
+    <div class="sb-srch">
+      <input class="srch-inp" placeholder="চ্যাট খোঁজো…" oninput="filt(this.value)"/>
+    </div>
+    <div class="clist" id="clist">
+      <div class="nolist">💬<br/>কোনো চ্যাট নেই<br/>+ দিয়ে শুরু করো!</div>
+    </div>
+    <div class="me-b" id="meb" style="display:none">
+      <div class="av-sm" id="meav"></div>
+      <div><div class="me-nm" id="menm"></div><div class="me-em" id="meem"></div></div>
+    </div>
+  </div>
+
+  <div class="main" id="main">
+    <div class="mempty" id="memp">
+      <div style="font-size:48px;opacity:.3">💬</div>
+      <div style="font-weight:600">Adda শুরু করো!</div>
+      <div style="font-size:13px">বাম থেকে চ্যাট বেছে নাও</div>
+    </div>
+    <div class="cwin" id="cwin">
+      <div class="chd">
+        <button class="ib bbtn" onclick="back()">
+          <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        </button>
+        <div class="av-sm" id="chav"></div>
+        <div class="chd-info">
+          <div class="chd-nm" id="chnm"></div>
+          <div class="chd-st" id="chst"></div>
+        </div>
+        <button class="ib" onclick="startCall(false)" title="Voice call">
+          <svg width="19" height="19" fill="currentColor" viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+        </button>
+        <button class="ib" onclick="startCall(true)" title="Video call">
+          <svg width="19" height="19" fill="currentColor" viewBox="0 0 24 24"><path d="M17 10.5V7a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1v-3.5l4 4v-11l-4 4z"/></svg>
+        </button>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="ibar">
+        <input class="minp" id="minp" placeholder="কিছু লেখো…" onkeydown="if(event.key==='Enter')send()"/>
+        <button class="sbtn" onclick="send()">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CALL -->
+<div class="cov" id="cov">
+  <video id="crv" class="crv" autoplay playsinline></video>
+  <video id="clv" class="clv" autoplay playsinline muted></video>
+  <div class="ctop">
+    <div class="cav" id="cav"></div>
+    <div class="cnm" id="cnm"></div>
+    <div class="cst" id="cst">Calling…</div>
+  </div>
+  <div class="cbtns">
+    <button class="cb cb-m" id="bmute" onclick="togMute()">🎤</button>
+    <button class="cb cb-e" onclick="endCall()">📵</button>
+    <button class="cb cb-c" id="bcam" onclick="togCam()">📷</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="mbg" id="modal">
+  <div class="mbox">
+    <div class="mhd">
+      <span class="mttl">নতুন আড্ডা 💬</span>
+      <button class="ib" onclick="closeM()">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
+    <input class="inp" id="uq" placeholder="নাম বা email দিয়ে খোঁজো…" oninput="searchU(this.value)" style="margin-bottom:8px"/>
+    <div id="ures" style="max-height:280px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// CDN ছাড়া direct fetch test
-async function test(){
+// ══════════════════════════════════════
+// তোমার Supabase credentials এখানে দাও
+const SB_URL = 'https://qmbhkdbxpcxadatlctew.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtYmhrZGJ4cGN4YWRhdGxjdGV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NTA2NjksImV4cCI6MjA5MzIyNjY2OX0.wKRq1TGAEOzVTm47rzNQ2tQW0Pn7I9QCZUik0D90250'; // ← শুধু এটা বদলাও
+// ══════════════════════════════════════
+
+const sb = supabase.createClient(SB_URL, SB_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true }
+});
+
+let ME=null, ACT=null, allC=[], mCh=null;
+let lSt=null, pc=null, mut=false, cam=false;
+const ICE=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}];
+const $=id=>document.getElementById(id);
+const ini=n=>(n||'?')[0].toUpperCase();
+const fmt=ts=>new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+// ── Auth ──────────────────────────────
+let MODE='in';
+function setM(m){
+  MODE=m;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['in','up'][i]===m));
+  $('nw').style.display=m==='up'?'block':'none';
+  $('abtn').textContent=m==='in'?'Sign In':'অ্যাকাউন্ট তৈরি করো';
+  $('err').textContent='';
+}
+
+async function auth(){
+  const em=$('iem').value.trim(), pw=$('ipw').value.trim();
+  $('err').textContent='';
+  if(!em||!pw){$('err').textContent='Email ও Password দাও';return}
+  if(pw.length<6){$('err').textContent='Password কমপক্ষে ৬ অক্ষর হতে হবে';return}
+  $('abtn').textContent='…';
   try{
-    const res = await fetch('https://qmbhkdbxpcxadatlctew.supabase.co/rest/v1/profiles?select=*&limit=1', {
-      headers:{
-        'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtYmhrZGJ4cGN4YWRhdGxjdGV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NTA2NjksImV4cCI6MjA5MzIyNjY2OX0.wKRq1TGAEOzVTm47rzNQ2tQW0Pn7I9QCZUik0D90250',
-        'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtYmhrZGJ4cGN4YWRhdGxjdGV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NTA2NjksImV4cCI6MjA5MzIyNjY2OX0.wKRq1TGAEOzVTm47rzNQ2tQW0Pn7I9QCZUik0D90250'
+    if(MODE==='in'){
+      const{error}=await sb.auth.signInWithPassword({email:em,password:pw});
+      if(error)throw error;
+    } else {
+      const nm=$('inm').value.trim();
+      if(!nm){$('err').textContent='নাম লেখো';$('abtn').textContent='অ্যাকাউন্ট তৈরি করো';return}
+      const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{full_name:nm}}});
+      if(error)throw error;
+      if(data?.user){
+        await sb.from('profiles').upsert({id:data.user.id,name:nm,email:em,online:true,updated_at:new Date().toISOString()});
       }
-    });
-    const data = await res.json();
-    document.getElementById('out').textContent = 'SUCCESS! ' + JSON.stringify(data);
+    }
   } catch(e){
-    document.getElementById('out').textContent = 'ERROR: ' + e.message;
+    $('err').textContent=e.message.includes('Invalid')?'Email বা Password ভুল':e.message.includes('already')?'এই email দিয়ে আগেই account আছে — Sign In করো':e.message;
+    $('abtn').textContent=MODE==='in'?'Sign In':'অ্যাকাউন্ট তৈরি করো';
   }
 }
-test();
+
+sb.auth.onAuthStateChange(async(ev,sess)=>{
+  if(sess?.user){
+    const u=sess.user;
+    await sb.from('profiles').upsert({
+      id:u.id,
+      name:u.user_metadata?.full_name||u.email.split('@')[0],
+      email:u.email,online:true,
+      updated_at:new Date().toISOString()
+    });
+    const{data:p}=await sb.from('profiles').select('*').eq('id',u.id).single();
+    ME=p||{id:u.id,name:u.user_metadata?.full_name||u.email.split('@')[0],email:u.email};
+    initApp();
+  } else {
+    ME=null;
+    $('p-auth').classList.add('show');
+    $('p-app').classList.remove('show');
+  }
+});
+
+window.addEventListener('beforeunload',()=>{ if(ME) sb.from('profiles').update({online:false}).eq('id',ME.id); });
+
+async function logout(){
+  if(ME) await sb.from('profiles').update({online:false}).eq('id',ME.id);
+  await sb.auth.signOut();
+}
+
+// ── App ───────────────────────────────
+function initApp(){
+  $('p-auth').classList.remove('show');
+  $('p-app').classList.add('show');
+  $('meb').style.display='flex';
+  $('meav').textContent=ini(ME.name);
+  $('menm').textContent=ME.name;
+  $('meem').textContent=ME.email;
+  loadChats();
+  listenRT();
+  listenCall();
+}
+
+async function loadChats(){
+  const{data}=await sb.from('chats')
+    .select('*')
+    .or(`user1_id.eq.${ME.id},user2_id.eq.${ME.id}`)
+    .order('updated_at',{ascending:false});
+  allC=data||[];
+  renderC(allC);
+}
+
+function renderC(list){
+  const el=$('clist');
+  if(!list.length){el.innerHTML='<div class="nolist">💬<br/>কোনো চ্যাট নেই<br/>+ দিয়ে শুরু করো!</div>';return}
+  el.innerHTML=list.map(c=>{
+    const nm=c.user1_id===ME.id?c.oname2:c.oname;
+    const uid=c.user1_id===ME.id?c.user2_id:c.user1_id;
+    return`<div class="ci${ACT?.id===c.id?' on':''}" onclick="openChat('${c.id}','${esc(nm)}','${uid}')">
+      <div class="av">${ini(nm)}</div>
+      <div class="ci-info">
+        <div class="ci-nm">${esc(nm)}</div>
+        <div class="ci-ls">${esc(c.last_msg||'আড্ডা শুরু করো! 👋')}</div>
+      </div>
+      <span class="ci-tm">${c.updated_at?fmt(c.updated_at):''}</span>
+    </div>`;
+  }).join('');
+}
+
+function filt(q){renderC(allC.filter(c=>{const n=c.user1_id===ME.id?c.oname2:c.oname;return(n||'').toLowerCase().includes(q.toLowerCase())}))}
+
+async function openChat(id,nm,uid){
+  ACT={id,name:nm,uid};
+  $('chnm').textContent=nm;
+  $('chav').textContent=ini(nm);
+  // status
+  const{data:p}=await sb.from('profiles').select('online,updated_at').eq('id',uid).single();
+  const st=$('chst');
+  if(p?.online){st.textContent='● Online';st.className='chd-st';}
+  else{st.textContent='Offline';st.className='chd-st off';}
+  $('memp').style.display='none';
+  $('cwin').classList.add('show');
+  $('main').classList.add('show');
+  // msgs
+  $('msgs').innerHTML='';
+  const{data:ms}=await sb.from('messages').select('*').eq('chat_id',id).order('created_at');
+  (ms||[]).forEach(addMsg);
+  scrollD();
+  $('minp').focus();
+  // realtime
+  if(mCh)sb.removeChannel(mCh);
+  mCh=sb.channel('c'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`chat_id=eq.${id}`},p=>{addMsg(p.new);scrollD();}).subscribe();
+  document.querySelectorAll('.ci').forEach(e=>e.classList.remove('on'));
+  event?.currentTarget?.classList?.add('on');
+}
+
+function back(){$('main').classList.remove('show');ACT=null;}
+
+function addMsg(m){
+  const mine=m.sender_id===ME.id;
+  const d=document.createElement('div');
+  d.className='mrow'+(mine?' me':'');
+  d.innerHTML=`${!mine?`<div class="av-sm">${ini(ACT?.name)}</div>`:''}<div class="bbl ${mine?'me':'them'}">${esc(m.content)}<span class="btm">${fmt(m.created_at)}</span></div>`;
+  $('msgs').appendChild(d);
+}
+
+function scrollD(){const m=$('msgs');m.scrollTop=m.scrollHeight;}
+
+async function send(){
+  const inp=$('minp'),txt=inp.value.trim();
+  if(!txt||!ACT)return;
+  inp.value='';
+  const now=new Date().toISOString();
+  await sb.from('messages').insert({chat_id:ACT.id,sender_id:ME.id,content:txt,created_at:now});
+  await sb.from('chats').update({last_msg:txt,updated_at:now}).eq('id',ACT.id);
+  loadChats();
+}
+
+// ── Realtime ──────────────────────────
+function listenRT(){
+  sb.channel('rt').on('postgres_changes',{event:'*',schema:'public',table:'chats'},()=>loadChats()).subscribe();
+}
+
+// ── User search ───────────────────────
+function openM(){$('modal').classList.add('show');$('uq').value='';$('uq').focus();searchU('');}
+function closeM(){$('modal').classList.remove('show');}
+
+async function searchU(q){
+  const{data}=await sb.from('profiles').select('*').neq('id',ME.id)
+    .or(`name.ilike.%${q}%,email.ilike.%${q}%`).limit(15);
+  const el=$('ures');
+  if(!data?.length){el.innerHTML='<div class="nores">কেউ পাওয়া গেল না</div>';return;}
+  el.innerHTML=data.map(u=>`<div class="urow" onclick="newChat('${u.id}','${esc(u.name)}')">
+    <div class="av-sm">${ini(u.name)}</div>
+    <div><div class="un">${esc(u.name)}</div><div class="ue">${esc(u.email)}</div></div>
+  </div>`).join('');
+}
+
+async function newChat(uid,nm){
+  closeM();
+  const{data:ex}=await sb.from('chats')
+    .select('*')
+    .or(`and(user1_id.eq.${ME.id},user2_id.eq.${uid}),and(user1_id.eq.${uid},user2_id.eq.${ME.id})`)
+    .maybeSingle();
+  if(ex){openChat(ex.id,nm,uid);return;}
+  const{data:c,error}=await sb.from('chats').insert({
+    user1_id:ME.id,user2_id:uid,
+    oname:nm,oname2:ME.name,
+    last_msg:'',updated_at:new Date().toISOString()
+  }).select().single();
+  if(c)openChat(c.id,nm,uid);
+  loadChats();
+}
+
+// ── Calls ─────────────────────────────
+async function startCall(vid){
+  if(!ACT){alert('আগে চ্যাট খোলো');return;}
+  try{lSt=await navigator.mediaDevices.getUserMedia({video:vid,audio:true});}
+  catch(e){try{lSt=await navigator.mediaDevices.getUserMedia({video:false,audio:true});}catch(e2){alert('Mic permission দাও');return;}}
+  $('cov').classList.add('show');
+  $('cnm').textContent=ACT.name;
+  $('cav').textContent=ini(ACT.name);
+  $('cst').textContent='Calling…';
+  $('cav').style.display=vid?'none':'flex';
+  if(vid){$('clv').srcObject=lSt;$('clv').style.display='block';}
+  const room=[ME.id,ACT.uid].sort().join('_');
+  pc=new RTCPeerConnection({iceServers:ICE});
+  lSt.getTracks().forEach(t=>pc.addTrack(t,lSt));
+  pc.ontrack=e=>{$('crv').srcObject=e.streams[0];$('cst').textContent='Connected ✓';};
+  pc.onicecandidate=async e=>{if(e.candidate)await sb.from('signaling').insert({room,from_id:ME.id,type:'ice',payload:JSON.stringify(e.candidate)});};
+  const off=await pc.createOffer();
+  await pc.setLocalDescription(off);
+  await sb.from('signaling').insert({room,from_id:ME.id,type:'offer',payload:JSON.stringify(off)});
+  sb.channel('sc'+room).on('postgres_changes',{event:'INSERT',schema:'public',table:'signaling',filter:`room=eq.${room}`},async p=>{
+    const{type:t,payload:pl,from_id:fi}=p.new;
+    if(fi===ME.id)return;
+    if(t==='answer')await pc.setRemoteDescription(JSON.parse(pl));
+    if(t==='ice')await pc.addIceCandidate(new RTCIceCandidate(JSON.parse(pl))).catch(()=>{});
+  }).subscribe();
+}
+
+function listenCall(){
+  sb.channel('ic'+ME.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'signaling'},async p=>{
+    const{type:t,payload:pl,from_id:fi,room}=p.new;
+    if(fi===ME.id||t!=='offer'||pc)return;
+    if(!confirm('📞 Incoming call! ধরবে?'))return;
+    try{lSt=await navigator.mediaDevices.getUserMedia({video:true,audio:true});}
+    catch(e){try{lSt=await navigator.mediaDevices.getUserMedia({video:false,audio:true});}catch(e2){return;}}
+    const{data:pr}=await sb.from('profiles').select('name').eq('id',fi).single();
+    $('cov').classList.add('show');
+    $('cnm').textContent=pr?.name||'Unknown';
+    $('cav').textContent=ini(pr?.name);
+    $('cst').textContent='Connected ✓';
+    $('clv').srcObject=lSt;$('clv').style.display='block';
+    pc=new RTCPeerConnection({iceServers:ICE});
+    lSt.getTracks().forEach(t2=>pc.addTrack(t2,lSt));
+    pc.ontrack=e=>{$('crv').srcObject=e.streams[0];};
+    pc.onicecandidate=async e=>{if(e.candidate)await sb.from('signaling').insert({room,from_id:ME.id,type:'ice',payload:JSON.stringify(e.candidate)});};
+    await pc.setRemoteDescription(JSON.parse(pl));
+    const ans=await pc.createAnswer();
+    await pc.setLocalDescription(ans);
+    await sb.from('signaling').insert({room,from_id:ME.id,type:'answer',payload:JSON.stringify(ans)});
+  }).subscribe();
+}
+
+function endCall(){
+  pc?.close();pc=null;
+  lSt?.getTracks().forEach(t=>t.stop());lSt=null;
+  $('crv').srcObject=null;$('clv').srcObject=null;$('clv').style.display='none';
+  $('cov').classList.remove('show');
+  mut=false;cam=false;$('bmute').textContent='🎤';$('bcam').textContent='📷';
+}
+function togMute(){mut=!mut;lSt?.getAudioTracks().forEach(t=>t.enabled=!mut);$('bmute').textContent=mut?'🔇':'🎤';}
+function togCam(){cam=!cam;lSt?.getVideoTracks().forEach(t=>t.enabled=!cam);$('bcam').textContent=cam?'📵':'📷';}
 </script>
 </body>
 </html>
